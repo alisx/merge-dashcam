@@ -13,6 +13,9 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build ${{ matrix.target }}
@@ -57,19 +60,10 @@ jobs:
           --distpath ./dist/${{ matrix.target }}
           src/merge_dashcam/cli.py
 
-      - name: Upload binary to Release (on release publish)
-        if: github.event_name == 'release'
+      - name: Upload binary to Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ./dist/${{ matrix.target }}/merge-dashcam${{ matrix.ext }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload binary to Release (on manual dispatch)
-        if: github.event_name == 'workflow_dispatch'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.event.inputs.tag }}
+          tag_name: ${{ github.event.inputs.tag || github.event.release.tag_name }}
           files: ./dist/${{ matrix.target }}/merge-dashcam${{ matrix.ext }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
