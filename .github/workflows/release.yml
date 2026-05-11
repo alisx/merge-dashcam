@@ -26,12 +26,15 @@ jobs:
         include:
           - os: ubuntu-latest
             target: linux
+            arch: x64
             ext: ""
           - os: windows-latest
             target: windows
+            arch: x64
             ext: ".exe"
           - os: macos-latest
             target: macos
+            arch: arm64
             ext: ""
 
     steps:
@@ -53,15 +56,16 @@ jobs:
         run: >
           pyinstaller
           --onefile
-          --name merge-dashcam${{ matrix.ext }}
-          --distpath ./dist/${{ matrix.target }}
+          --name merge-dashcam-${{ matrix.target }}-${{ matrix.arch }}${{ matrix.ext }}
+          --distpath ./dist
           src/merge_dashcam/cli.py
 
       - name: Upload binary to Release
         run: |
-          gh release upload "${TAG}" "./dist/${TARGET}/merge-dashcam${EXT}" --clobber
+          gh release upload "${TAG}" "./dist/merge-dashcam-${TARGET}-${ARCH}${EXT}" --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ github.event.inputs.tag || github.event.release.tag_name }}
           TARGET: ${{ matrix.target }}
+          ARCH: ${{ matrix.arch }}
           EXT: ${{ matrix.ext }}
