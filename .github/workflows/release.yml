@@ -3,10 +3,16 @@ name: Build Release Binaries
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag name to attach binaries to (e.g. v1.1.0)'
+        required: true
+        default: 'v1.1.0'
 
 jobs:
   build:
-    name: Build ${{ matrix.os }}
+    name: Build ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -15,12 +21,15 @@ jobs:
           - os: ubuntu-latest
             target: linux
             ext: ""
+            arch: x64
           - os: windows-latest
             target: windows
             ext: ".exe"
+            arch: x64
           - os: macos-latest
             target: macos
             ext: ""
+            arch: arm64
 
     steps:
       - name: Checkout code
@@ -39,15 +48,26 @@ jobs:
 
       - name: Build binary with PyInstaller
         run: |
-          pyinstaller \
-            --onefile \
-            --name merge-dashcam${{ matrix.ext }} \
-            --distpath ./dist/${{ matrix.target }} \
+          pyinstaller `
+            --onefile `
+            --name merge-dashcam${{ matrix.ext }} `
+            --distpath ./dist/${{ matrix.target }} `
             src/merge_dashcam/cli.py
+        shell: bash
 
-      - name: Upload binary to Release
+      - name: Upload binary to Release (on release publish)
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
+          files: ./dist/${{ matrix.target }}/merge-dashcam${{ matrix.ext }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload binary to Release (on manual dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
           files: ./dist/${{ matrix.target }}/merge-dashcam${{ matrix.ext }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
