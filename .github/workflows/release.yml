@@ -1,0 +1,53 @@
+name: Build Release Binaries
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux
+            ext: ""
+          - os: windows-latest
+            target: windows
+            ext: ".exe"
+          - os: macos-latest
+            target: macos
+            ext: ""
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -e .
+
+      - name: Build binary with PyInstaller
+        run: |
+          pyinstaller \
+            --onefile \
+            --name merge-dashcam${{ matrix.ext }} \
+            --distpath ./dist/${{ matrix.target }} \
+            src/merge_dashcam/cli.py
+
+      - name: Upload binary to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./dist/${{ matrix.target }}/merge-dashcam${{ matrix.ext }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
