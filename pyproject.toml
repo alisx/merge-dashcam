@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "merge-dashcam"
+version = "1.1.0"
+description = "按时间顺序合并行车记录仪/摄像机分段视频的命令行工具"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [
+    {name = "User"},
+]
+keywords = ["dashcam", "video", "merge", "concat", "ffmpeg", "cli"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Utilities",
+]
+dependencies = []
+
+[project.scripts]
+merge-dashcam = "merge_dashcam.cli:main"
+merge_dashcam = "merge_dashcam.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/yourname/merge-dashcam"
+Issues = "https://github.com/yourname/merge-dashcam/issues"
