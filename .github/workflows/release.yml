@@ -10,6 +10,9 @@ on:
         required: true
         default: 'v1.1.0'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     name: Build ${{ matrix.target }}
@@ -47,13 +50,12 @@ jobs:
           pip install -e .
 
       - name: Build binary with PyInstaller
-        run: |
-          pyinstaller `
-            --onefile `
-            --name merge-dashcam${{ matrix.ext }} `
-            --distpath ./dist/${{ matrix.target }} `
-            src/merge_dashcam/cli.py
-        shell: bash
+        run: >
+          pyinstaller
+          --onefile
+          --name merge-dashcam${{ matrix.ext }}
+          --distpath ./dist/${{ matrix.target }}
+          src/merge_dashcam/cli.py
 
       - name: Upload binary to Release (on release publish)
         if: github.event_name == 'release'
